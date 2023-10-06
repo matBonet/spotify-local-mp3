@@ -1,0 +1,7 @@
+*env
+test
+.cache
+
+
+README_old.md
+spotify_to_mp3_old.py
