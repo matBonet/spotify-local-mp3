@@ -1,33 +1,32 @@
 import os
 from dotenv import load_dotenv
-from pprint import pprint as pp
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 if __name__ == "__main__":
     load_dotenv()
-    scope = 'playlist-read-private'
+    SCOPE = 'playlist-read-private'
 
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=SCOPE))
 
     results = sp.current_user_playlists()
-    playlists = dict()
-    songs = dict()
+    playlists = {}
+    songs = {}
     for p in results['items']:
         if p['owner']['id'] == os.getenv('SPOTIFY_USERNAME'):
-            id = p['uri'].split(':')[-1]
-            playlists[id] = {'name': p['name'], 'id': id, 'tracks': list()}
+            _id = p['uri'].split(':')[-1]
+            playlists[_id] = {'name': p['name'], 'id': _id, 'tracks': []}
 
-    for id, data in playlists.items():
-        results = sp.playlist_items(id)
+    for _id in playlists:
+        results = sp.playlist_items(_id)
         # Check if there are more pages! (offset and limit)
         for s in results['items']:
-            id = s['track']['uri'].split(':')[-1]
-            if songs.get(id):
+            _id = s['track']['uri'].split(':')[-1]
+            if songs.get(_id):
                 continue
-            songs[id] = {
-                'id': id,
+            songs[_id] = {
+                'id': _id,
                 'name': s['track']['name'],
                 'artists': '; '.join([a['name'] for a in s['track']['artists']]),
                 'album_name': s['track']['album']['name'],
@@ -37,7 +36,7 @@ if __name__ == "__main__":
                 'popularity': s['track']['popularity']
             }
     import yaml
-    with open('test/test_songs.yaml', 'w') as f:
+    with open('test/test_songs.yaml', 'w', encoding="utf-8") as f:
         yaml.dump(songs, f)
-    with open('test/test_playlists.yaml', 'w') as f:
+    with open('test/test_playlists.yaml', 'w', encoding="utf-8") as f:
         yaml.dump(playlists, f)
